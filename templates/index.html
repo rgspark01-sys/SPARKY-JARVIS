@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#071426">
+  <title>SPARKY | JARVIS AI</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="shell">
+  <header class="topbar">
+    <div class="brand"><div class="orb">S</div><div><b>SPARKY</b><small>J.A.R.V.I.S. INSPIRED ASSISTANT</small></div></div>
+    <div class="status-pill"><span class="dot"></span> SYSTEM ONLINE</div>
+  </header>
+  <main>
+    <section class="hero">
+      <div class="eyebrow">PERSONAL AI • VOICE • PC CONTROL</div>
+      <h1>Your laptop.<br><span>Your command.</span></h1>
+      <p>Talk in English, Tamil or Tanglish. Chat with AI, check laptop health and launch supported apps.</p>
+      <div class="voice-row">
+        <button id="micBtn" class="mic" aria-label="Start voice recognition">🎙</button>
+        <div><b id="voiceTitle">Tap to speak</b><small id="voiceHint">Chrome or Edge microphone permission required</small></div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="panel chat-panel">
+        <div class="panel-head"><div><span class="eyebrow">AI CORE</span><h2>Talk to SPARKY</h2></div><span class="tag">GROQ AI</span></div>
+        <div id="chatLog" class="chat-log"><div class="bubble bot">Hello! I'm SPARKY. Ask me anything in English, Tamil or Tanglish. Vanakkam! 👋</div></div>
+        <div class="composer-tools">
+          <button type="button" id="attachBtn" title="Attach file">📎</button>
+          <button type="button" id="cameraBtn" title="Open camera">📷</button>
+          <button type="button" id="historyBtn" title="Chat history">🕘</button>
+          <input type="file" id="fileInput" accept="image/*,.pdf,.txt,.doc,.docx" hidden>
+          <input type="file" id="cameraInput" accept="image/*" capture="environment" hidden>
+        </div>
+        <div id="attachmentPreview" class="hint"></div>
+        <div class="composer"><input id="message" placeholder="Type your command or question..." autocomplete="off"><button id="sendBtn">SEND ↗</button></div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head"><div><span class="eyebrow">LIVE MONITOR</span><h2>Laptop status</h2></div><button class="refresh" id="refreshBtn">↻</button></div>
+        <div class="metrics">
+          <div class="metric"><small>CPU</small><b id="cpu">--</b><div class="bar"><i id="cpuBar"></i></div></div>
+          <div class="metric"><small>RAM</small><b id="ram">--</b><div class="bar"><i id="ramBar"></i></div></div>
+          <div class="metric"><small>DISK</small><b id="disk">--</b><div class="bar"><i id="diskBar"></i></div></div>
+          <div class="metric"><small>BATTERY</small><b id="battery">--</b><small id="batteryInfo">Laptop battery</small></div>
+        </div>
+        <div class="substatus"><span>Wi-Fi</span><b id="wifi">--</b></div>
+        <div class="actions">
+          <button data-action="downloads">Downloads</button><button data-action="documents">Documents</button>
+          <button data-action="notepad">Notepad</button><button data-action="calculator">Calculator</button>
+          <button data-action="chrome">Chrome</button><button data-action="claude">Claude</button>
+          <button data-action="vscode">VS Code</button><button data-action="file explorer">File Explorer</button>
+          <button class="warn" data-action="wifi_off">Wi-Fi OFF</button><button data-action="wifi_on">Wi-Fi ON</button>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head"><div><span class="eyebrow">LIVE INFO</span><h2>Weather</h2></div></div>
+        <div class="weather-form"><input id="city" value="Chennai" aria-label="City"><button id="weatherBtn">CHECK</button></div>
+        <div id="weatherResult" class="info-result">Tap CHECK to get current weather.</div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head"><div><span class="eyebrow">WORLD UPDATE</span><h2>Latest headlines</h2></div><button class="refresh" id="newsBtn">↻</button></div>
+        <div id="newsList" class="news-list">Tap refresh to load headlines.</div>
+      </article>
+    </section>
+    <footer>SPARKY • Runs on your Windows laptop • Android connects over the same Wi-Fi</footer>
+  </main>
+</div>
+<div id="toast" class="toast"></div>
+<script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+const $ = id => document.getElementById(id);
+let pin = sessionStorage.getItem("sparky_pin");
+if (!pin) { pin = prompt("Enter your SPARKY PIN (default first-run PIN: 2468):") || ""; sessionStorage.setItem("sparky_pin", pin); }
+const history = [];
+function headers(){return {"Content-Type":"application/json","X-Jarvis-Pin":pin};}
+function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2600);}
+function addBubble(text,who){const d=document.createElement("div");d.className="bubble "+who;d.textContent=text;$("chatLog").appendChild(d);$("chatLog").scrollTop=$("chatLog").scrollHeight;}
+async function sendMessage(text){
+  text=(text||$("message").value).trim();
+  if(!text && !selectedFile)return;
+
+  const fileToSend = selectedFile;
+  const displayText = text || "Please analyse this attached image.";
+  $("message").value="";
+  addBubble(displayText + (fileToSend ? " 📎 " + fileToSend.name : ""), "user");
+  history.push({role:"user",content:displayText});
+  saveChatHistory();
+  $("sendBtn").disabled=true;
+
+  try{
+    const form = new FormData();
+    form.append("message", text);
+    form.append("history", JSON.stringify(history.slice(-8,-1)));
+    if(fileToSend) form.append("file", fileToSend);
+
+    const r=await fetch("/api/chat",{
+      method:"POST",
+      headers:{"X-Jarvis-Pin":pin},
+      body:form
+    });
+
+    const d=await r.json();
+    if(!r.ok)throw Error(d.error||"Upload failed");
+
+    addBubble(d.reply,"bot");
+    history.push({role:"assistant",content:d.reply});
+    saveChatHistory();
+
+    if(fileToSend){
+      selectedFile=null;
+      $("attachmentPreview").textContent="";
+      $("fileInput").value="";
+      $("cameraInput").value="";
+    }
+  }
+  catch(e){
+    addBubble(e.message,"bot");
+    saveChatHistory();
+  }
+  finally{
+    $("sendBtn").disabled=false;
+  }
+}
+$("sendBtn").onclick=()=>sendMessage();
+$("message").addEventListener("keydown",e=>{if(e.key==="Enter")sendMessage();});
+function speak(text){if(!("speechSynthesis" in window))return;window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang="en-IN";u.rate=1;window.speechSynthesis.speak(u);}
+async function loadStatus(){
+ try{const r=await fetch("/api/status",{headers:headers()});const d=await r.json();if(!r.ok)throw Error(d.error);
+ $("cpu").textContent=d.cpu_percent+"%";$("ram").textContent=d.ram_percent+"%";$("disk").textContent=d.disk_percent+"%";
+ $("cpuBar").style.width=d.cpu_percent+"%";$("ramBar").style.width=d.ram_percent+"%";$("diskBar").style.width=d.disk_percent+"%";
+ $("battery").textContent=d.battery?d.battery.percent+"%":"N/A";
+ $("batteryInfo").textContent=d.battery?(d.battery.plugged?"Charging":"On battery"):"No battery detected";
+ $("wifi").textContent=d.wifi;
+ }catch(e){toast(e.message);}
+}
+$("refreshBtn").onclick=loadStatus;
+document.querySelectorAll("[data-action]").forEach(b=>b.onclick=async()=>{
+ try{const r=await fetch("/api/action",{method:"POST",headers:headers(),body:JSON.stringify({action:b.dataset.action})});const d=await r.json();if(!r.ok)throw Error(d.error);toast(d.message);}
+ catch(e){toast(e.message);}
+});
+$("weatherBtn").onclick=async()=>{
+ $("weatherResult").textContent="Loading...";
+ try{const r=await fetch("/api/weather?city="+encodeURIComponent($("city").value));const d=await r.json();if(!r.ok)throw Error(d.error);
+ $("weatherResult").innerHTML=`<b>${d.city}, ${d.country}</b><br>🌡 ${d.temperature}°C (feels ${d.feels}°C)<br>Humidity ${d.humidity}% · Wind ${d.wind} km/h`;
+ }catch(e){$("weatherResult").textContent=e.message;}
+};
+$("newsBtn").onclick=async()=>{
+ $("newsList").textContent="Loading headlines...";
+ try{const r=await fetch("/api/news");const d=await r.json();if(!r.ok)throw Error(d.error);
+ $("newsList").replaceChildren();d.items.forEach(x=>{const a=document.createElement("a");a.href=x.link;a.target="_blank";a.rel="noopener";a.textContent=x.title;$("newsList").appendChild(a);});
+ }catch(e){$("newsList").textContent=e.message;}
+};
+const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+let recognition=null;
+if(SpeechRecognition){recognition=new SpeechRecognition();recognition.lang="en-IN";recognition.interimResults=false;recognition.onstart=()=>{$("micBtn").classList.add("listening");$("voiceTitle").textContent="Listening...";};recognition.onend=()=>{$("micBtn").classList.remove("listening");$("voiceTitle").textContent="Tap to speak";};recognition.onerror=()=>toast("Mic issue. Check browser permission and internet.");recognition.onresult=e=>sendMessage(e.results[0][0].transcript);}
+$("micBtn").onclick=()=>{if(!recognition){toast("Voice recognition works best in Chrome on Android or Chrome/Edge on Windows.");return;}try{recognition.lang="en-IN";recognition.start();}catch(e){toast("Microphone is already listening.");}};
+loadStatus();
+// SPARKY attachment, camera and chat history
+let selectedFile = null;
+let savedChats = JSON.parse(localStorage.getItem("sparky_chats") || "[]");
+
+function saveChatHistory() {
+  if (!history.length) return;
+
+  savedChats = JSON.parse(localStorage.getItem("sparky_chats") || "[]");
+  const last = savedChats[savedChats.length - 1];
+
+  if (last && last.id === window.sparkyChatId) {
+    last.messages = history;
+  } else {
+    savedChats.push({
+      id: window.sparkyChatId,
+      date: new Date().toLocaleString(),
+      messages: history
+    });
+  }
+
+  savedChats = savedChats.slice(-30);
+  localStorage.setItem("sparky_chats", JSON.stringify(savedChats));
+}
+
+window.sparkyChatId = Date.now().toString();
+
+$("attachBtn").onclick = () => $("fileInput").click();
+$("cameraBtn").onclick = () => $("cameraInput").click();
+
+function chooseFile(file) {
+  if (!file) return;
+  selectedFile = file;
+  $("attachmentPreview").textContent = "Selected: " + file.name;
+  toast("File selected successfully.");
+}
+
+$("fileInput").onchange = e => chooseFile(e.target.files[0]);
+$("cameraInput").onchange = e => chooseFile(e.target.files[0]);
+
+$("historyBtn").onclick = () => {
+  savedChats = JSON.parse(localStorage.getItem("sparky_chats") || "[]");
+
+  if (!savedChats.length) {
+    toast("No saved chat history yet.");
+    return;
+  }
+
+  const choice = prompt(
+    savedChats.map((c, i) => `${i + 1}. ${c.date}`).join("\n") +
+    "\nEnter chat number to open:"
+  );
+
+  const index = Number(choice) - 1;
+  if (!Number.isInteger(index) || !savedChats[index]) return;
+
+  history.length = 0;
+  history.push(...savedChats[index].messages);
+  $("chatLog").replaceChildren();
+
+  history.forEach(m =>
+    addBubble(m.content, m.role === "user" ? "user" : "bot")
+  );
+
+  window.sparkyChatId = savedChats[index].id;
+  toast("Chat history opened.");
+};

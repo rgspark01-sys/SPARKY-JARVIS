@@ -1,0 +1,11 @@
+.env
+.env.*
+!.env.example
+__pycache__/
+*.pyc
+.venv/
+venv/
+app.py.backup
+app.py.before_upload
+app.py.before_documents
+*.backup
