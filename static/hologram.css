@@ -1,0 +1,129 @@
+.sparky-hologram {
+  width: 100%;
+  min-height: 370px;
+  margin: 20px auto;
+  padding: 16px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  isolation: isolate;
+  border: 1px solid rgba(0, 210, 255, .35);
+  border-radius: 22px;
+  background:
+    radial-gradient(ellipse at 50% 75%, rgba(0, 180, 255, .18), transparent 55%),
+    linear-gradient(145deg, #06182b, #020814 70%);
+  box-shadow:
+    0 0 30px rgba(0, 190, 255, .13),
+    inset 0 0 35px rgba(0, 190, 255, .08);
+}
+
+.sparky-hologram::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: .22;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 4px,
+    rgba(0, 220, 255, .12) 5px
+  );
+}
+
+.sparky-hologram::after {
+  content: "";
+  position: absolute;
+  width: 75%;
+  height: 1px;
+  top: 0;
+  left: 12.5%;
+  background: #42edff;
+  box-shadow: 0 0 16px #00dfff;
+  animation: dragonScan 5s linear infinite;
+  pointer-events: none;
+}
+
+.sparky-hologram canvas {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  max-width: 520px;
+  height: 300px;
+  filter: drop-shadow(0 0 12px rgba(255, 112, 20, .22));
+}
+
+.hologram-label,
+.hologram-status {
+  position: relative;
+  z-index: 3;
+  text-align: center;
+  font-family: Arial, sans-serif;
+}
+
+.hologram-label {
+  color: #54eaff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 6px;
+  text-shadow: 0 0 12px #00cfff;
+}
+
+.hologram-status {
+  margin-top: 4px;
+  color: #b5efff;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-shadow: 0 0 9px #00cfff;
+}
+
+.sparky-hologram.listening {
+  border-color: rgba(0, 255, 255, .8);
+  box-shadow: 0 0 35px rgba(0, 220, 255, .3),
+              inset 0 0 30px rgba(0, 220, 255, .12);
+}
+
+.sparky-hologram.thinking {
+  border-color: rgba(255, 160, 45, .8);
+  box-shadow: 0 0 35px rgba(255, 130, 20, .25),
+              inset 0 0 30px rgba(255, 130, 20, .1);
+}
+
+.sparky-hologram.speaking {
+  border-color: rgba(0, 255, 220, .8);
+  box-shadow: 0 0 40px rgba(0, 255, 220, .3),
+              inset 0 0 30px rgba(0, 255, 220, .12);
+}
+
+@keyframes dragonScan {
+  0% { top: 0; opacity: .2; }
+  50% { opacity: .9; }
+  100% { top: 100%; opacity: .2; }
+}
+
+@media (max-width: 600px) {
+  .sparky-hologram {
+    min-height: 320px;
+    margin: 12px auto;
+    padding: 12px 6px;
+    border-radius: 17px;
+  }
+
+  .sparky-hologram canvas {
+    height: 260px;
+  }
+
+  .hologram-label {
+    font-size: 11px;
+    letter-spacing: 4px;
+  }
+
+  .hologram-status {
+    font-size: 10px;
+  }
+}

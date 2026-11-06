@@ -1,0 +1,230 @@
+(() => {
+  const canvas = document.getElementById("sparkyHologramCanvas");
+  if (!canvas) return;
+
+  const ctx = canvas.getContext("2d");
+  const panel = document.getElementById("sparkyHologram");
+  const status = document.getElementById("hologramStatus");
+
+  let w = 0, h = 0, frame = 0;
+  let state = "idle";
+  let particles = [];
+
+  function resize() {
+    const rect = canvas.getBoundingClientRect();
+    const ratio = Math.min(devicePixelRatio || 1, 2);
+    w = rect.width;
+    h = rect.height;
+    canvas.width = w * ratio;
+    canvas.height = h * ratio;
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+
+    particles = Array.from({length: 130}, () => ({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      r: Math.random() * 2 + .5,
+      p: Math.random() * 6.28
+    }));
+  }
+
+  function setState(next) {
+    state = next;
+    panel?.classList.remove("listening", "thinking", "speaking");
+    if (next !== "idle") panel?.classList.add(next);
+
+    status.textContent = ({
+      idle: "PIKACHU • ONLINE",
+      listening: "PIKACHU LISTENING...",
+      thinking: "PIKACHU THINKING...",
+      speaking: "PIKACHU SPEAKING..."
+    })[next] || "PIKACHU • ONLINE";
+  }
+
+  function glow(color, blur) {
+    ctx.shadowColor = color;
+    ctx.shadowBlur = blur;
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+  }
+
+  function drawPikachu(cx, cy) {
+    const bob = Math.sin(frame * 3) * 3;
+    const talking = state === "speaking";
+    const mouth = talking ? 2 + Math.abs(Math.sin(frame * 13)) * 9 : 1;
+    const wiggle = Math.sin(frame * 2.2) * 3;
+
+    ctx.save();
+    ctx.translate(cx, cy + bob);
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    // Lightning tail
+    ctx.save();
+    ctx.translate(28, 20);
+    ctx.rotate(Math.sin(frame * 2) * .07);
+    glow("#ffe600", 22);
+    ctx.lineWidth = 12;
+    ctx.beginPath();
+    ctx.moveTo(0, 35);
+    ctx.lineTo(22, 10);
+    ctx.lineTo(8, -2);
+    ctx.lineTo(43, -42);
+    ctx.lineTo(29, -12);
+    ctx.lineTo(48, -8);
+    ctx.lineTo(12, 30);
+    ctx.stroke();
+    ctx.restore();
+
+    // Ears
+    glow("#ffdf00", 20);
+    ctx.lineWidth = 17;
+    ctx.beginPath();
+    ctx.moveTo(-25, -57);
+    ctx.quadraticCurveTo(-55, -105 - wiggle, -48, -145);
+    ctx.moveTo(25, -57);
+    ctx.quadraticCurveTo(55, -105 + wiggle, 48, -145);
+    ctx.stroke();
+
+    ctx.strokeStyle = "#252525";
+    ctx.lineWidth = 17;
+    ctx.beginPath();
+    ctx.moveTo(-48, -145);
+    ctx.lineTo(-45, -126);
+    ctx.moveTo(48, -145);
+    ctx.lineTo(45, -126);
+    ctx.stroke();
+
+    // Arms
+    glow("#ffdf00", 18);
+    ctx.lineWidth = 13;
+    ctx.beginPath();
+    ctx.moveTo(-25, 5);
+    ctx.lineTo(-48, 25);
+    ctx.moveTo(25, 5);
+    ctx.lineTo(48, 25);
+    ctx.stroke();
+
+    // Feet
+    ctx.fillStyle = "#ffdf00";
+    ctx.beginPath();
+    ctx.ellipse(-19, 75, 17, 9, -.15, 0, Math.PI * 2);
+    ctx.ellipse(19, 75, 17, 9, .15, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Body
+    glow("#ffe600", 25);
+    ctx.lineWidth = 4;
+    ctx.fillStyle = "#ffdf00";
+    ctx.beginPath();
+    ctx.ellipse(0, 25, 43, 54, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Head
+    ctx.beginPath();
+    ctx.ellipse(0, -48, 49, 43, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Eyes
+    glow("#171717", 10);
+    ctx.fillStyle = "#171717";
+    ctx.beginPath();
+    ctx.ellipse(-19, -54, 5, 8, 0, 0, Math.PI * 2);
+    ctx.ellipse(19, -54, 5, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Red electric cheeks
+    glow("#ff3030", talking ? 32 : 18);
+    ctx.fillStyle = "#ff3434";
+    ctx.beginPath();
+    ctx.arc(-34, -32, 10, 0, Math.PI * 2);
+    ctx.arc(34, -32, 10, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Nose and talking mouth
+    glow("#7a3b12", 8);
+    ctx.fillStyle = "#7a3b12";
+    ctx.beginPath();
+    ctx.arc(0, -39, 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = "#7a3b12";
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(-8, -29);
+    ctx.quadraticCurveTo(0, -25 + mouth, 8, -29);
+    ctx.stroke();
+
+    if (talking) {
+      ctx.fillStyle = "#8b1e2d";
+      ctx.beginPath();
+      ctx.ellipse(0, -27 + mouth * .35, 4, mouth * .35, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Electric sparks
+    if (talking || state === "listening") {
+      for (let i = 0; i < 4; i++) {
+        const side = i % 2 ? 1 : -1;
+        const y = -30 + Math.sin(frame * 10 + i) * 18;
+        glow("#fff200", 24);
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(side * 48, y - 8);
+        ctx.lineTo(side * 58, y);
+        ctx.lineTo(side * 50, y + 8);
+        ctx.stroke();
+      }
+    }
+
+    ctx.restore();
+  }
+
+  function draw() {
+    frame += .025;
+    ctx.clearRect(0, 0, w, h);
+
+    const cx = w / 2;
+    const cy = h / 2;
+
+    const aura = ctx.createRadialGradient(cx, cy, 5, cx, cy, 190);
+    aura.addColorStop(0, "rgba(255,220,0,.20)");
+    aura.addColorStop(1, "rgba(255,180,0,0)");
+    ctx.fillStyle = aura;
+    ctx.fillRect(0, 0, w, h);
+
+    // Floating electric particles
+    for (const p of particles) {
+      p.y -= .35;
+      if (p.y < 0) p.y = h;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y + Math.sin(frame + p.p) * 5, p.r, 0, 6.28);
+      ctx.fillStyle = "rgba(255,225,0,.8)";
+      ctx.shadowColor = "#ffe600";
+      ctx.shadowBlur = 10;
+      ctx.fill();
+    }
+
+    // Hologram ring
+    ctx.save();
+    ctx.translate(cx, cy + 120);
+    ctx.rotate(frame);
+    glow("#ffe600", 18);
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 125, 23, 0, 0, 6.28);
+    ctx.stroke();
+    ctx.restore();
+
+    drawPikachu(cx, cy);
+    ctx.shadowBlur = 0;
+    requestAnimationFrame(draw);
+  }
+
+  window.SparkyHologram = {setState};
+  resize();
+  addEventListener("resize", resize);
+  setState("idle");
+  draw();
+})();

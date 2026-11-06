@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#050d19">
+  <title>SPARKY | JARVIS AI</title>
+  <link rel="stylesheet" href="/static/style.css?v=6">
+  <link rel="stylesheet" href="/static/hologram.css?v=6">
+</head>
+<body>
+
+<button id="menuBtn" class="menu-btn" type="button">☰</button>
+
+<aside id="chatSidebar" class="chat-sidebar">
+  <div class="sidebar-head">
+    <b>SPARKY CHATS</b>
+    <button id="closeSidebar" type="button">×</button>
+  </div>
+  <button id="newChatBtn" class="new-chat-btn" type="button">＋ New chat</button>
+  <div id="chatHistoryList" class="chat-history-list"></div>
+</aside>
+
+<div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+<div class="shell">
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="orb">S</div>
+      <div>
+        <b>SPARKY</b>
+        <small>J.A.R.V.I.S. INSPIRED ASSISTANT</small>
+      </div>
+    </div>
+    <div class="status-pill"><span class="dot"></span> SYSTEM ONLINE</div>
+  </header>
+
+  <main>
+
+    <section class="dashboard-layout">
+
+      <!-- LEFT CONTROL PANEL -->
+      <aside class="left-rail">
+
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <span class="eyebrow">QUICK ACCESS</span>
+              <h2>Command Center</h2>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button data-action="downloads">Downloads</button>
+            <button data-action="documents">Documents</button>
+            <button data-action="notepad">Notepad</button>
+            <button data-action="calculator">Calculator</button>
+            <button data-action="chrome">Chrome</button>
+            <button data-action="claude">Claude</button>
+            <button data-action="vscode">VS Code</button>
+            <button data-action="file explorer">File Explorer</button>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <span class="eyebrow">DEVICE CONTROL</span>
+              <h2>Android Actions</h2>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button data-action="wifi_on">Wi-Fi ON</button>
+            <button class="warn" data-action="wifi_off">Wi-Fi OFF</button>
+            <button data-action="flashlight_on">Flashlight ON</button>
+            <button class="warn" data-action="flashlight_off">Flashlight OFF</button>
+            <button data-action="volume_up">Volume +</button>
+            <button data-action="volume_down">Volume -</button>
+            <button data-action="vibrate">VIBRATE</button>
+            <button class="warn" data-action="volume_mute">Mute / Unmute</button>
+          </div>
+        </article>
+
+      </aside>
+
+      <!-- CENTER HOLOGRAM -->
+      <section class="center-stage">
+
+        <section id="sparkyHologram" class="sparky-hologram" aria-label="SPARKY hologram assistant">
+          <div class="hologram-label">S P A R K Y</div>
+          <canvas id="sparkyHologramCanvas" aria-label="Animated SPARKY hologram"></canvas>
+          <div id="hologramStatus" class="hologram-status">ONLINE • READY</div>
+        </section>
+
+        <section class="voice-controls">
+          <button type="button" id="micBtn">🎤 MIC</button>
+          <button type="button" id="callBtn">📞 CALL SPARKY</button>
+          <button type="button" id="wakeBtn">🎧 HEY SPARKY: OFF</button>
+        </section>
+
+        <div class="voice-status">
+          <h3 id="voiceTitle">SPARKY Voice Assistant Ready</h3>
+          <p id="voiceHint">Tap MIC, CALL SPARKY or enable Hey SPARKY.</p>
+        </div>
+
+      </section>
+
+      <!-- RIGHT STATUS PANELS -->
+      <aside class="right-rail">
+
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <span class="eyebrow">LIVE MONITOR</span>
+              <h2>Laptop Status</h2>
+            </div>
+            <button class="refresh" id="refreshBtn">↻</button>
+          </div>
+
+          <div class="metrics">
+            <div class="metric">
+              <small>CPU</small>
+              <b id="cpu">--</b>
+              <div class="bar"><i id="cpuBar"></i></div>
+            </div>
+            <div class="metric">
+              <small>RAM</small>
+              <b id="ram">--</b>
+              <div class="bar"><i id="ramBar"></i></div>
+            </div>
+            <div class="metric">
+              <small>DISK</small>
+              <b id="disk">--</b>
+              <div class="bar"><i id="diskBar"></i></div>
+            </div>
+            <div class="metric">
+              <small>BATTERY</small>
+              <b id="battery">--</b>
+              <small id="batteryInfo">Laptop battery</small>
+            </div>
+          </div>
+
+          <div class="substatus">
+            <span>Wi-Fi</span>
+            <b id="wifi">--</b>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <span class="eyebrow">ANDROID</span>
+              <h2>Notifications</h2>
+            </div>
+            <button class="refresh" id="notificationsBtn">↻</button>
+          </div>
+          <div class="notification-controls">
+            <button type="button" id="readNotificationsBtn">🔊 READ ALOUD</button>
+            <button type="button" id="autoNotifyBtn">🔔 AUTO ANNOUNCE: OFF</button>
+          </div>
+          <div id="notificationList" class="info-result">
+            Tap refresh to read Android notifications.
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <span class="eyebrow">LIVE INFO</span>
+              <h2>Weather</h2>
+            </div>
+          </div>
+          <div class="weather-form">
+            <input id="city" value="Chennai" aria-label="City">
+            <button id="weatherBtn">CHECK</button>
+          </div>
+          <div id="weatherResult" class="info-result">
+            Tap CHECK to get current weather.
+          </div>
+        </article>
+
+      </aside>
+
+    </section>
+
+    <!-- BOTTOM WORKSPACE -->
+    <section class="bottom-grid">
+
+      <article class="panel chat-panel">
+        <div class="panel-head">
+          <div>
+            <span class="eyebrow">AI CORE</span>
+            <h2>Talk to SPARKY</h2>
+          </div>
+          <span class="tag">GROQ AI</span>
+        </div>
+
+        <div id="chatLog" class="chat-log">
+          <div class="bubble bot">
+            Hello! I'm SPARKY. Ask me anything in English, Tamil or Tanglish. Vanakkam! 👋
+          </div>
+        </div>
+
+        <div class="composer-tools">
+          <button type="button" id="attachBtn" title="Attach file">📎</button>
+          <button type="button" id="cameraBtn" title="Open camera">📷</button>
+          <button type="button" id="historyBtn" title="Chat history">🕘</button>
+          <input type="file" id="fileInput" accept="image/*,.pdf,.txt,.doc,.docx" multiple hidden>
+          <input type="file" id="cameraInput" accept="image/*" capture="environment" multiple hidden>
+        </div>
+
+        <div id="attachmentPreview" class="hint"></div>
+
+        <div class="composer">
+          <input id="message" placeholder="Type your command or question..." autocomplete="off">
+          <button id="sendBtn">SEND ↗</button>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head">
+          <div>
+            <span class="eyebrow">ANDROID</span>
+            <h2>SMS Messages</h2>
+          </div>
+        </div>
+        <div class="sms-controls">
+          <button type="button" id="smsBtn">↻ REFRESH SMS</button>
+          <button type="button" id="readSmsBtn">🔊 READ ALOUD</button>
+        </div>
+        <div id="smsList" class="info-result">
+          Tap refresh to read recent SMS messages.
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head">
+          <div>
+            <span class="eyebrow">WORLD UPDATE</span>
+            <h2>Latest Headlines</h2>
+          </div>
+          <button class="refresh" id="newsBtn">↻</button>
+        </div>
+        <div id="newsList" class="news-list">
+          Tap refresh to load headlines.
+        </div>
+      </article>
+
+    </section>
+
+    <footer>SPARKY • JARVIS INSPIRED AI ASSISTANT</footer>
+
+  </main>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="/static/hologram.js?v=20"></script>
+<script src="/static/app.js?v=11"></script>
+
+</body>
+</html>
